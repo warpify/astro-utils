@@ -15,7 +15,7 @@ interface Props {
 }
 
 // https://github.com/snowpackjs/astro/issues/1107
-const { offset = 500, scrollSpeed = 2, color } = Astro.props as props;
+const { offset = 500, scrollSpeed = 200, color = "#a365db" } = Astro.props as props;
 ---
 
 <div class="progress-wrap button-up">
@@ -23,80 +23,86 @@ const { offset = 500, scrollSpeed = 2, color } = Astro.props as props;
 		<path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"></path>
 	</svg>
 	<i class="arrow-up"></i>
-</div>
+	<script define:vars={{ offset, scrollSpeed }}>
+		//Scroll back to top
+		window.onload = function () {
+			var progressWrap = document.querySelector(".progress-wrap");
+			var progressPath = progressWrap.querySelector("path");
 
-<script define:vars={{ offset, scrollSpeed }}>
-	//Scroll back to top
+			var pathLength = progressPath.getTotalLength();
+			progressPath.style.transition = progressPath.style.WebkitTransition = "none";
+			progressPath.style.strokeDasharray = pathLength + " " + pathLength;
+			progressPath.style.strokeDashoffset = pathLength;
+			progressPath.getBoundingClientRect();
+			progressPath.style.transition = progressPath.style.WebkitTransition = "stroke-dashoffset 10ms linear";
 
-	window.onload = function () {
-		var progressWrap = document.querySelector(".progress-wrap");
-		var progressPath = progressWrap.querySelector("path");
+			var updateProgress = function () {
+				var scroll = window.pageYOffset; //$(window).scrollTop();
+				var height = document.body.scrollHeight - window.screen.height; // $(document).height() - $(window).height();
+				var progress = pathLength - (scroll * pathLength) / height;
 
-		var pathLength = progressPath.getTotalLength();
-		progressPath.style.transition = progressPath.style.WebkitTransition = "none";
-		progressPath.style.strokeDasharray = pathLength + " " + pathLength;
-		progressPath.style.strokeDashoffset = pathLength;
-		progressPath.getBoundingClientRect();
-		progressPath.style.transition = progressPath.style.WebkitTransition = "stroke-dashoffset 10ms linear";
-
-		var updateProgress = function () {
-			var scroll = window.pageYOffset; //$(window).scrollTop();
-			var height = document.body.scrollHeight - window.screen.height; // $(document).height() - $(window).height();
-			var progress = pathLength - (scroll * pathLength) / height;
-
-			if (progress <= 0) {
-				progress = 0;
-			}
-
-			progressPath.style.strokeDashoffset = progress;
-		};
-
-		updateProgress();
-		document.addEventListener("scroll", updateProgress, false); //$(window).scroll(updateProgress);
-
-		// When scroll change, add class on (header) (the scroll effect of header)
-		window.addEventListener("scroll", function (e) {
-			if (this.scrollY > offset) {
-				progressWrap.classList.add("active-progress");
-			} else {
-				progressWrap.classList.remove("active-progress");
-			}
-		});
-
-		function scrollToTop(scrollSpeed) {
-			debugger;
-			// cancel if already on top
-			if (document.scrollingElement.scrollTop === 0) return;
-
-			const cosParameter = document.scrollingElement.scrollTop / 2;
-			let scrollCount = 0,
-				oldTimestamp = null;
-
-			function step(newTimestamp) {
-				if (oldTimestamp !== null) {
-					scrollCount += (Math.PI * (newTimestamp - oldTimestamp)) / scrollSpeed;
-					if (scrollCount >= Math.PI) return (document.scrollingElement.scrollTop = 0);
-					document.scrollingElement.scrollTop = cosParameter + cosParameter * Math.cos(scrollCount);
+				if (progress <= 0) {
+					progress = 0;
 				}
-				oldTimestamp = newTimestamp;
+
+				progressPath.style.strokeDashoffset = progress;
+			};
+
+			updateProgress();
+			document.addEventListener("scroll", updateProgress, false); //$(window).scroll(updateProgress);
+
+			// When scroll change, add class on (header) (the scroll effect of header)
+			window.addEventListener("scroll", function (e) {
+				if (this.scrollY > offset) {
+					progressWrap.classList.add("active-progress");
+				} else {
+					progressWrap.classList.remove("active-progress");
+				}
+			});
+
+			function scrollToTop(scrollSpeed) {
+				// cancel if already on top
+				if (document.scrollingElement.scrollTop === 0) return;
+
+				const cosParameter = document.scrollingElement.scrollTop / 2;
+				let scrollCount = 0,
+					oldTimestamp = null;
+
+				function step(newTimestamp) {
+					if (oldTimestamp !== null) {
+						scrollCount += (Math.PI * (newTimestamp - oldTimestamp)) / scrollSpeed;
+						if (scrollCount >= Math.PI) return (document.scrollingElement.scrollTop = 0);
+						document.scrollingElement.scrollTop = cosParameter + cosParameter * Math.cos(scrollCount);
+					}
+					oldTimestamp = newTimestamp;
+					window.requestAnimationFrame(step);
+				}
 				window.requestAnimationFrame(step);
 			}
-			window.requestAnimationFrame(step);
-		}
 
-		progressWrap.addEventListener("click", function (event) {
-			event.preventDefault();
-			scrollToTop(scrollSpeed);
-			return false;
+			progressWrap.addEventListener("click", function (event) {
+				event.preventDefault();
+				scrollToTop(scrollSpeed);
+				return false;
+			});
+		};
+		window.addEventListener("scroll", function (e) {
+			var root = document.documentElement;
+
+			if (this.scrollY > header.offsetHeight / 2) {
+				root.classList.add("site-scrolled");
+			} else {
+				root.classList.remove("site-scrolled");
+			}
 		});
-	};
-</script>
+	</script>
+</div>
 
 <style define:vars={{ color }}>
 	/* #Progress
 ================================================== */
 	.progress-wrap {
-		color: var(--color);
+		color: var(--color-primary, var(--color, #a365db));
 		position: fixed;
 		right: 30px;
 		bottom: 30px;
@@ -122,7 +128,7 @@ const { offset = 500, scrollSpeed = 2, color } = Astro.props as props;
 		fill: none;
 	}
 	.progress-wrap svg.progress-circle path {
-		stroke: var(--color-primary);
+		stroke: var(--color-primary, var(--color, #a365db));
 		stroke-width: 4;
 		box-sizing: border-box;
 		-webkit-transition: all 200ms linear;
@@ -134,7 +140,7 @@ const { offset = 500, scrollSpeed = 2, color } = Astro.props as props;
 	}
 
 	.arrow-up {
-		color: var(--color-primary);
+		color: var(--color-primary, var(--color, #a365db));
 		box-sizing: border-box;
 		position: absolute;
 		display: block;
