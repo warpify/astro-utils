@@ -25,7 +25,7 @@ const { offset = 500, scrollSpeed = 200, color = "#a365db" } = Astro.props as Pr
 	<i class="arrow-up"></i>
 </div>
 
-<script hoist define:vars={{ offset, scrollSpeed }}>
+<script define:vars={{ offset, scrollSpeed }}>
 	//Scroll back to top
 	window.addEventListener("load", (event) => {
 		var progressWrap = document.querySelector(".progress-wrap");

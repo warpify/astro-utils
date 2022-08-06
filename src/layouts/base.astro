@@ -1,20 +1,22 @@
+---
+import "../style/main.scss";
+---
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="stylesheet" href={Astro.resolve("../style/main.scss")} />
 	</head>
 
 	<body>
 		<main id="main">
 			<slot />
 		</main>
+		<style lang="scss">
+			main {
+				flex: 1 0 0;
+			}
+		</style>
 	</body>
 </html>
-
-<style lang="scss">
-	main {
-		flex: 1 0 0;
-	}
-</style>
